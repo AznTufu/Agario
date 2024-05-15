@@ -3,28 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
 <body>
-    <p>last message</p>
-    <p class="data"></p>
-    <textarea name="" id="" cols="30" rows="10"></textarea>
-    <button onclick="send()">Refresh</button>
-
+    <div class="room-container">
+        <p>Room</p>
+        <p class="room"></p>
+    </div>
+    <div class="input-container">
+        <input name="" id="" cols="30" rows="10"></input>
+        <button onclick="send()">submit</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+<script src="game.js"></script>
 <script>
     let i = 0;
     let room = '';
     let socketid = '';
-    const text = document.querySelector('textarea');
+    const text = document.querySelector('input');
     const socket = io('http://localhost:3000');
     socket.on('connect', () => {
         console.log('Connected');
     });
     socket.on('message', (data) => {
         console.log(data);
-        document.querySelector('.data').innerText = data;
+        document.querySelector('.room').innerText = room;
     });
     socket.on('disconnect', () => {
         console.log('Disconnected');
@@ -41,6 +47,5 @@
         socket.emit('join', e.target.value);
         room = e.target.value;
     });
-
 </script>
 </html>
