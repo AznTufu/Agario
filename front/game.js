@@ -4,8 +4,8 @@ let ctx = canvas.getContext('2d');
 let player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    size: 20,
-    color: 'white'
+    size: 4,
+    color: 'blue'
 };
 
 let food = [];
@@ -39,8 +39,23 @@ function checkFoodCollision() {
     }
 }
 
+let mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+};
+
+canvas.addEventListener('mousemove', function(e) {
+    let rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+});
+
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    player.x = mouse.x;
+    player.y = mouse.y;
+
     drawPlayer();
     drawFood();
     checkFoodCollision();
