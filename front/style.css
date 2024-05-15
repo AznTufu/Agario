@@ -1,4 +1,5 @@
 body {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -12,6 +13,17 @@ p {
     margin: 0;
 }
 
+.container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    gap: 12px;
+    background-color: white;
+    z-index: 1;
+    padding: 10px 20px;
+}
+
 .room-container {
     display: flex;
     gap: 20px;
@@ -22,7 +34,7 @@ p {
 }
 
 #gameCanvas {
-    width: 100%;
-    height: 100%;
-    border: 1px solid #000;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
