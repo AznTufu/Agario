@@ -20,8 +20,9 @@ function drawPlayers() {
     if (Array.isArray(window.players)) {
         window.players.forEach(player => {
             ctx.beginPath();
-            ctx.arc(player.x, player.y, player.size * globalScale, 0, Math.PI * 2);
-            ctx.fillStyle = player.color;
+            console.log(player.x, player.y, player.size * globalScale);
+            ctx.arc(0, 0, player.size * globalScale, 0, Math.PI * 2);
+            ctx.fillStyle = 'player.color';
             ctx.fill();
             ctx.closePath();
         });
@@ -118,4 +119,4 @@ canvas.addEventListener('mousemove', function(e) {
 
 window.players = window.players || [];
 
-gameLoop();
+window.requestAnimationFrame(gameLoop);

@@ -29,6 +29,16 @@ let players = {};
 io.on('connection', (socket) => {
     console.log('a user connected');
     socket.broadcast.emit('user connected');
+    socket.join('Welcome');
+    console.log('join room: Welcome')
+    players[socket.id] = {
+        x: gameParameters.x,
+        y: gameParameters.y,
+        size: gameParameters.size,
+        color: gameParameters.colors[Math.floor(Math.random() * gameParameters.colors.length)],
+        room: 'Welcome'
+    };
+    io.to('Welcome').emit('playersData', getPlayersInRoom('Welcome'));
 
     socket.on('joinRoom', (room) => {
         console.log('join room: ' + room);
