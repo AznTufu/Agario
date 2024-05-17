@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+gi<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -37,17 +37,14 @@
         console.log('Disconnected');
     });
 
-    let send = () => {
-        i++;
-        console.log(text.value);
-        //socket.emit('message', `Message ${i}`);
-        socket.emit('room', text.value, `Message ${i}`);
-    }
     text.addEventListener('change', (e) => {
         socket.emit('leave', room);
         socket.emit('join', e.target.value);
         room = e.target.value;
     });
+    socket.on('playerData', (data) => {
+        player = data;
+    }); 
 </script>
 <script src="game.js"></script>
 </html>
