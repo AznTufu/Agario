@@ -45,6 +45,13 @@
         console.log('Disconnected');
     });
 
+    socket.on('id', (data) => {
+        socketid = data;
+        console.log("get id: " + socketid);
+    });
+
+    socket.emit('getid')
+
     text.addEventListener('change', (e) => {
         socket.emit('leave', room);
         socket.emit('joinRoom', e.target.value);
@@ -54,11 +61,15 @@
     socket.on('playersData', (data) => {
         players = {};
         data.forEach(player => {
-            players[player.id] = player;
+            if (player.id === socket.id) {
+                currentPlayer = player;
+            }
+            else players[player.id] = player;
         });
-        currentPlayer = players[socket.id];
-
-        drawPlayers();
+        console.log(players);
+        //delete players[socket.id];
+        console.log(currentPlayer);
+        //
     });
 </script>
 <script src="game.js"></script>

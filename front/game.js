@@ -26,6 +26,23 @@ function drawPlayers() {
     }
 }
 
+function drawOthersPlayers() {
+    if (currentPlayer) {
+        for (let id in players) {
+            if (id !== currentPlayer.id) {
+                let player = players[id];
+                ctx.beginPath();
+                let x = (player.x - currentPlayer.x) * globalScale;
+                let y = (player.y - currentPlayer.y) * globalScale;
+                ctx.arc(x, y, player.size * globalScale, 0, Math.PI * 2);
+                ctx.fillStyle = player.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+}
+
 function drawFood() {
     if (currentPlayer) {
         for(let i = 0; i < food.length; i++) {
@@ -41,12 +58,40 @@ function drawFood() {
 }
 
 
-function checkFoodCollision() {
-    if (currentPlayer) {
+function checkCollisions() {
+    for (let id1 in players) {
+        for (let id2 in players) {
+            if (id1 !== id2) {
+                let player1 = players[id1];
+                let player2 = players[id2];
+                let dx = player1.x - player2.x;
+                let dy = player1.y - player2.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < player1.size + player2.size) {
+                    if (player1.size > player2.size) {
+                        player1.size += player2.size / 2;
+                        delete players[id2];
+                    } else if (player2.size > player1.size) {
+                        player2.size += player1.size / 2;
+                        delete players[id1];
+                    }
+                }
+            }
+        }
+    }
+}
+
+function checkFoodCollisions() {
+    for (let id in players) {
+        let player = players[id];
         for(let i = 0; i < food.length; i++) {
-            let distance = Math.hypot(currentPlayer.x - food[i].x, currentPlayer.y - food[i].y);
-            if(distance < currentPlayer.size + food[i].size) {
-                currentPlayer.size += food[i].size / 2;
+            let dx = player.x - food[i].x;
+            let dy = player.y - food[i].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if(distance < player.size + food[i].size) {
+                player.size += food[i].size / 2;
                 food.splice(i, 1);
                 let newSize = 1;
                 let newColor = colors[Math.floor(Math.random() * colors.length)];
@@ -59,7 +104,7 @@ function checkFoodCollision() {
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (currentPlayer) {
+    if (currentPlayer && currentPlayer.id === socket.id) {
         currentPlayer.mouse = currentPlayer.mouse || {x: 0, y: 0};
 
         let dx = currentPlayer.mouse.x - currentPlayer.x;
@@ -74,8 +119,8 @@ function gameLoop() {
             currentPlayer.y += dy / distance * speed;
             if (currentPlayer.x < 0) currentPlayer.x = 0;
             if (currentPlayer.y < 0) currentPlayer.y = 0;
-            if (currentPlayer.x > 2000) currentPlayer.x = 2000;
-            if (currentPlayer.y > 2000) currentPlayer.y = 2000;
+            if (currentPlayer.x > 500) currentPlayer.x = 500;
+            if (currentPlayer.y > 500) currentPlayer.y = 500;
         } else {
             currentPlayer.x = currentPlayer.mouse.x;
             currentPlayer.y = currentPlayer.mouse.y;
@@ -86,12 +131,18 @@ function gameLoop() {
         ctx.scale(playerScale, playerScale);
 
         drawPlayers();
+        drawOthersPlayers();
         drawFood();
-        checkFoodCollision();
+
+        checkCollisions();
+        checkFoodCollisions();
 
         ctx.restore();
+        currentPlayer.id = currentPlayer.id || socket.id;
+        socket.emit('playerMoved', { id: currentPlayer.id, x: currentPlayer.x, y: currentPlayer.y });
     }
-
+    console.log(currentPlayer);
+    
     requestAnimationFrame(gameLoop);
 }
 
@@ -106,11 +157,11 @@ for(let i = 0; i < 1500; i++) {
 canvas.addEventListener('mousemove', function(e) {
     let rect = canvas.getBoundingClientRect();
     if (currentPlayer) {
+        currentPlayer.mouse = currentPlayer.mouse || {};
         currentPlayer.mouse.x = (e.clientX - rect.left) / globalScale + currentPlayer.x - canvas.width / (2 * globalScale);
         currentPlayer.mouse.y = (e.clientY - rect.top) / globalScale + currentPlayer.y - canvas.height / (2 * globalScale);
     }
+    //socket.emit('playerMoved', { id: currentPlayer.id, x: currentPlayer.x, y: currentPlayer.y });
 });
 
-window.players = window.players || [];
-
-window.requestAnimationFrame(gameLoop);
+gameLoop();

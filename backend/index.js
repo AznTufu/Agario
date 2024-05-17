@@ -85,7 +85,21 @@ io.on('connection', (socket) => {
         socket.leave(room);
         io.to(room).emit('leave', room);
     });
+    socket.on('playerMoved', (data) => {
+        if (players[data.id]) {
+            players[data.id].x = data.x;
+            players[data.id].y = data.y;
+
+            // Émettez les données de tous les joueurs à tous les clients
+            io.emit('playersData', Object.values(players));
+        }
+    });
+    socket.on('getid', () => {
+        socket.emit('id', socket.id);
+    });
 })
+
+
 
 function getPlayersInRoom(room) {
     return Object.values(players).filter(player => player.room === room);
