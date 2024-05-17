@@ -32,6 +32,7 @@ io.on('connection', (socket) => {
     socket.join('Welcome');
     console.log('join room: Welcome')
     players[socket.id] = {
+        id: socket.id,
         x: gameParameters.x,
         y: gameParameters.y,
         size: gameParameters.size,
@@ -44,6 +45,7 @@ io.on('connection', (socket) => {
         console.log('join room: ' + room);
         socket.join(room);
         players[socket.id] = {
+            id: socket.id,
             x: gameParameters.x,
             y: gameParameters.y,
             size: gameParameters.size,

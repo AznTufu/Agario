@@ -26,6 +26,7 @@
     let socketid = '';
     let text = document.querySelector('input');
     let players = [];
+    let currentPlayer;
 
     function send() {
         const message = text.value;
@@ -51,9 +52,12 @@
     });
     
     socket.on('playersData', (data) => {
-        console.log(data);
-        players = data;
-        window.players = players;
+        players = {};
+        data.forEach(player => {
+            players[player.id] = player;
+        });
+        currentPlayer = players[socket.id];
+
         drawPlayers();
     });
 </script>
