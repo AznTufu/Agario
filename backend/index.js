@@ -5,49 +5,56 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 const app = express();
 const server = http.createServer(app);
-import path from 'path';
 const PORT = 3000;
-const __dirname = path.resolve();
-//
 const io = new Server(server, {
     cors: {
         origin: '*',
         }
 })
+
 app.use(cors())
 app.get('/', (req, res) => {
     res.json('ip address: http://' + ip.address()+':'+PORT);    
 });
-//send index.html
-app.get('/game', (req, res) => {
-    //cut back to path
-    let pathIndex = __dirname.split('backend');
-    //concat path
-    let realPath = pathIndex[0]
-    console.log(realPath)
-    res.sendFile(realPath + '/front/index.html');
-});
+
+let gameParameters = {
+    x: Math.random() * 1800, 
+    y: Math.random() * 1800,
+    size: 4,
+    colors: ['red', 'blue', 'green', 'yellow', 'purple'],
+};
 
 let players = {};
-let colors = ['red', 'blue', 'green', 'yellow', 'purple'];
 
 io.on('connection', (socket) => {
     console.log('a user connected');
     socket.broadcast.emit('user connected');
 
-    players[socket.id] = {
-        size: 4,
-        color: colors[Math.floor(Math.random() * colors.length)]
-    };
-    socket.emit('playerData', players[socket.id]);
-    
+    socket.on('joinRoom', (room) => {
+        console.log('join room: ' + room);
+        socket.join(room);
+        players[socket.id] = {
+            x: gameParameters.x,
+            y: gameParameters.y,
+            size: gameParameters.size,
+            color: gameParameters.colors[Math.floor(Math.random() * gameParameters.colors.length)],
+            room: room
+        };
+        io.to(room).emit('playersData', getPlayersInRoom(room));
+    });
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
         socket.broadcast.emit('user disconnected');
-        delete players[socket.id];
+        let room = players[socket.id] ? players[socket.id].room : null;
+        if (room) {
+            delete players[socket.id];
+            io.to(room).emit('playersData', getPlayersInRoom(room));
+        }
     });
+
     socket.on('message', (msg) => {
-        console.log('message: ' + msg);
+        console.log('Room name: ' + msg);
         io.emit('message', msg);
     });
     
@@ -67,6 +74,10 @@ io.on('connection', (socket) => {
         io.to(room).emit('leave', room);
     });
 })
+
+function getPlayersInRoom(room) {
+    return Object.values(players).filter(player => player.room === room);
+}
 
 
 server.listen(PORT, () => {

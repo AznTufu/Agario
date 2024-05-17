@@ -1,4 +1,4 @@
-gi<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +24,14 @@ gi<!DOCTYPE html>
     let i = 0;
     let room = '';
     let socketid = '';
-    const text = document.querySelector('input');
+    let text = document.querySelector('input');
+    let players = [];
+
+    function send() {
+        const message = text.value;
+        socket.emit('message', message);
+    }
+    
     const socket = io('http://localhost:3000');
     socket.on('connect', () => {
         console.log('Connected');
@@ -39,12 +46,16 @@ gi<!DOCTYPE html>
 
     text.addEventListener('change', (e) => {
         socket.emit('leave', room);
-        socket.emit('join', e.target.value);
+        socket.emit('joinRoom', e.target.value);
         room = e.target.value;
     });
-    socket.on('playerData', (data) => {
-        player = data;
-    }); 
+    
+    socket.on('playersData', (data) => {
+        console.log(data);
+        players = data;
+        window.players = players;
+        drawPlayers();
+    });
 </script>
 <script src="game.js"></script>
 </html>
